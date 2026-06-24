@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package group;
+
+message Group {
+  string id = 1;
+  string name = 2;
+  int32 memberCount = 3;
+  string createdAt = 4;
+}
+
+message GroupMember {
+  string userId = 1;
+  string groupId = 2;
+  string username = 3;
+  string joinedAt = 4;
+}
+
+// ── Groups ────────────────────────────────────────────
+message CreateGroupRequest {
+  string name = 1;
+  repeated string memberIds = 2;
+}
+
+message GetGroupRequest {
+  string id = 1;
+}
+
+message ListGroupsForUserRequest {
+  string userId = 1;
+}
+
+message ListGroupsForUserResponse {
+  repeated Group groups = 1;
+}
+
+message UpdateGroupRequest {
+  string id = 1;
+  optional string name = 2;
+}
+
+message DeleteGroupRequest {
+  string id = 1;
+}
+
+message DeleteGroupResponse {
+  bool success = 1;
+}
+
+// ── Members ───────────────────────────────────────────
+message AddGroupMemberRequest {
+  string groupId = 1;
+  string userId = 2;
+}
+
+message RemoveGroupMemberRequest {
+  string groupId = 1;
+  string userId = 2;
+}
+
+message RemoveGroupMemberResponse {
+  bool success = 1;
+}
+
+message ListGroupMembersRequest {
+  string groupId = 1;
+}
+
+message ListGroupMembersResponse {
+  repeated GroupMember members = 1;
+}
+
+// ── Availability ──────────────────────────────────────
+message AddAvailabilityRequest {
+  string userId = 1;
+  string date = 2;
+}
+
+message AvailabilityEntry {
+  int32 id = 1;
+  string userId = 2;
+  string availableDate = 3;
+}
+
+message RemoveAvailabilityRequest {
+  string userId = 1;
+  string date = 2;
+}
+
+message RemoveAvailabilityResponse {
+  bool success = 1;
+}
+
+message GetMyAvailabilityRequest {
+  string userId = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message GetMyAvailabilityResponse {
+  repeated AvailabilityEntry entries = 1;
+}
+
+message GetGroupAvailabilityRequest {
+  string groupId = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message DayAvailability {
+  string date = 1;
+  int32 count = 2;
+  int32 totalMembers = 3;
+  repeated GroupMember availableMembers = 4;
+}
+
+message GetGroupAvailabilityResponse {
+  repeated DayAvailability days = 1;
+}
+
+service GroupService {
+  rpc CreateGroup(CreateGroupRequest) returns (Group);
+  rpc GetGroup(GetGroupRequest) returns (Group);
+  rpc ListGroupsForUser(ListGroupsForUserRequest) returns (ListGroupsForUserResponse);
+  rpc UpdateGroup(UpdateGroupRequest) returns (Group);
+  rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+
+  rpc AddGroupMember(AddGroupMemberRequest) returns (GroupMember);
+  rpc RemoveGroupMember(RemoveGroupMemberRequest) returns (RemoveGroupMemberResponse);
+  rpc ListGroupMembers(ListGroupMembersRequest) returns (ListGroupMembersResponse);
+
+  rpc AddAvailability(AddAvailabilityRequest) returns (AvailabilityEntry);
+  rpc RemoveAvailability(RemoveAvailabilityRequest) returns (RemoveAvailabilityResponse);
+  rpc GetMyAvailability(GetMyAvailabilityRequest) returns (GetMyAvailabilityResponse);
+  rpc GetGroupAvailability(GetGroupAvailabilityRequest) returns (GetGroupAvailabilityResponse);
+}
