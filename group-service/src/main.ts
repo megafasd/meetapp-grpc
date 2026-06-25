@@ -9,16 +9,16 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.GRPC,
     options: {
-      package: "user",
-      protoPath: join(import.meta.dirname, "../../../proto/user.proto"),
-      url: "0.0.0.0:50051",
+      package: "group",
+      protoPath: join(import.meta.dirname, "../../../proto/group.proto"),
+      url: "0.0.0.0:50052",
     },
   });
 
-  app.useGlobalFilters(new GrpcExceptionFilter());
+  app.useGlobalFilters(new GrpcExceptionFilter()); // 👈 add this line
 
   await app.listen();
-  console.log("🚀 User Service (gRPC) running on port 50051");
+  console.log("🚀 Group Service (gRPC) running on port 50052");
 }
 
 bootstrap();
