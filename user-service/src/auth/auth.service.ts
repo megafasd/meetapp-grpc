@@ -18,12 +18,12 @@ export class AuthService {
   constructor(private usersService: UsersService) {
     try {
       this.privateKey = fs.readFileSync(
-        path.join(import.meta.dirname, "../../../certs/jwt-private.pem"),
-        "utf8"
+      path.join(import.meta.dirname, "../../../../certs/jwt-private.pem"),
+      "utf8"
       );
       this.publicKey = fs.readFileSync(
-        path.join(import.meta.dirname, "../../../certs/jwt-public.pem"),
-        "utf8"
+      path.join(import.meta.dirname, "../../../../certs/jwt-public.pem"),
+      "utf8"
       );
     } catch {
       throw new Error("JWT key pair not found — ensure certs/jwt-private.pem and jwt-public.pem exist");

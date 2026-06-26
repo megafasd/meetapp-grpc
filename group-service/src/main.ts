@@ -19,17 +19,18 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GrpcExceptionFilter());
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      exceptionFactory: (errors) =>
-        new RpcException({
-          code: GrpcStatus.INVALID_ARGUMENT,
-          message: errors
-            .map((e) => Object.values(e.constraints ?? {}).join(", "))
-            .join("; "),
-        }),
-    })
-  );
+app.useGlobalPipes(
+   new ValidationPipe({
+     transform: true,
+     exceptionFactory: (errors) =>
+       new RpcException({
+         code: GrpcStatus.INVALID_ARGUMENT,
+         message: errors
+           .map((e) => Object.values(e.constraints ?? {}).join(", "))
+           .join("; "),
+       }),
+   })
+ );
 
   await app.listen();
   console.log("🚀 Group Service (gRPC) running on port 50052");

@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength, IsArray, IsUUID } from "class-validator";
+import { IsString, MinLength, MaxLength, IsArray, IsUUID, IsOptional } from "class-validator";
 
 export class CreateGroupDto {
   @IsString()
@@ -9,7 +9,8 @@ export class CreateGroupDto {
   @IsUUID()
   creatorUserId!: string;
 
+  @IsOptional()
   @IsArray()
   @IsUUID("4", { each: true })
-  memberIds!: string[];
+  memberIds?: string[];
 }

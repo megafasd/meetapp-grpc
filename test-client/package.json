@@ -14,7 +14,11 @@
     "@bufbuild/protobuf": "^2.12.1",
     "@grpc/grpc-js": "^1.14.4",
     "@grpc/proto-loader": "^0.8.1",
-    "nice-grpc": "^2.1.16"
+    "@nestjs/common": "^11.1.27",
+    "class-transformer": "^0.5.1",
+    "nice-grpc": "^2.1.16",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
