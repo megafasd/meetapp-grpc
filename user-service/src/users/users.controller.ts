@@ -1,7 +1,8 @@
-import { Controller } from "@nestjs/common";
+import { Controller, UsePipes, ValidationPipe } from "@nestjs/common";
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable, from } from "rxjs";
 import { UsersService } from "./users.service.js";
+import { UpdateUserDto } from "./dto/update-user.dto.js";
 
 @Controller()
 export class UsersController {
@@ -26,13 +27,13 @@ export class UsersController {
   }
 
   @GrpcMethod("UserService", "UpdateUser")
-  async updateUser(data: { id: string; username?: string; password?: string }) {
-    const user = await this.usersService.update(data.id, {
-      username: data.username,
-      password: data.password,
-    });
-    return { ...user, createdAt: user.createdAt.toISOString() };
-  }
+  async updateUser(data: UpdateUserDto) {
+  const user = await this.usersService.update(data.id, {
+    username: data.username,
+    password: data.password,
+  });
+  return { ...user, createdAt: user.createdAt.toISOString() };
+}
 
   @GrpcMethod("UserService", "DeleteUser")
   async deleteUser(data: { id: string }) {

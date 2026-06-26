@@ -8,7 +8,7 @@ import { throwError } from "rxjs";
 export class GrpcExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, _host: ArgumentsHost) {
     if (exception instanceof RpcException) {
-      return throwError(() => exception);
+      return throwError(() => exception.getError()); 
     }
 
     if (exception instanceof NotFoundException) {

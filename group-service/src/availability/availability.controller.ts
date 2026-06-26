@@ -1,20 +1,21 @@
 import { Controller } from "@nestjs/common";
 import { GrpcMethod } from "@nestjs/microservices";
 import { AvailabilityService } from "./availability.service.js";
+import { AddAvailabilityDto } from "./dto/add-availability.dto.js";
 
 @Controller()
 export class AvailabilityController {
   constructor(private availabilityService: AvailabilityService) {}
 
   @GrpcMethod("GroupService", "AddAvailability")
-  async addAvailability(data: { userId: string; date: string }) {
-    const entry = await this.availabilityService.addAvailability(data.userId, data.date);
-    return {
-      id: entry.id,
-      userId: entry.userId,
-      availableDate: entry.availableDate.toISOString().split("T")[0],
-    };
-  }
+  async addAvailability(data: AddAvailabilityDto) {
+  const entry = await this.availabilityService.addAvailability(data.userId, data.date);
+  return {
+    id: entry.id,
+    userId: entry.userId,
+    availableDate: entry.availableDate.toISOString().split("T")[0],
+  };
+}
 
   @GrpcMethod("GroupService", "RemoveAvailability")
   async removeAvailability(data: { userId: string; date: string }) {

@@ -1,16 +1,17 @@
 import { Controller } from "@nestjs/common";
 import { GrpcMethod } from "@nestjs/microservices";
 import { GroupsService } from "./groups.service.js";
+import { CreateGroupDto } from "./dto/create-group.dto.js";
 
 @Controller()
 export class GroupsController {
   constructor(private groupsService: GroupsService) {}
 
   @GrpcMethod("GroupService", "CreateGroup")
-   async createGroup(data: { name: string; creatorUserId: string; memberIds: string[] }) {
+  async createGroup(data: CreateGroupDto) {
     const group = await this.groupsService.create(data.name, data.creatorUserId, data.memberIds);
     return this.toGroupResponse(group);
-}
+  }
 
   @GrpcMethod("GroupService", "GetGroup")
   async getGroup(data: { id: string }) {

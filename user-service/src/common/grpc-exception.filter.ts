@@ -8,7 +8,7 @@ export class GrpcExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, _host: ArgumentsHost) {
     // Already a proper gRPC error (e.g. from AuthService) — pass it through unchanged
     if (exception instanceof RpcException) {
-      return throwError(() => exception);
+      return throwError(() => exception.getError());
     }
 
     // Map common Nest HTTP-style exceptions to the right gRPC status code
