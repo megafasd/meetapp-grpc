@@ -1,0 +1,11 @@
+{
+  "name": "meetapp-grpc",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "user-service",
+    "group-service",
+    "gateway",
+    "shared-dto"
+  ]
+}

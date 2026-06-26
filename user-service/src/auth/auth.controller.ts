@@ -1,8 +1,7 @@
 import { Controller, UsePipes, ValidationPipe } from "@nestjs/common";
 import { GrpcMethod } from "@nestjs/microservices";
 import { AuthService } from "./auth.service.js";
-import { RegisterDto } from "./dto/register.dto.js";
-import { LoginDto } from "./dto/login.dto.js";
+import { RegisterDto, LoginDto } from "@meetapp/shared-dto";
 
 @Controller()
 export class AuthController {

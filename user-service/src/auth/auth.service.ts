@@ -4,28 +4,30 @@ import { status as GrpcStatus } from "@grpc/grpc-js";
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { UsersService } from "../users/users.service.js";
+import * as fs from "fs";
+import * as path from "path";
 
-// ── Token lifespans — business decisions, not environment config ──
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
 
 @Injectable()
 export class AuthService {
-  private readonly accessTokenSecret: string;
-  private readonly refreshTokenSecret: string;
+  private readonly privateKey: string;
+  private readonly publicKey: string;
 
   constructor(private usersService: UsersService) {
-    const accessSecret = process.env.JWT_ACCESS_SECRET;
-    const refreshSecret = process.env.JWT_REFRESH_SECRET;
-
-    if (!accessSecret || !refreshSecret) {
-      throw new Error(
-        "JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set in the environment"
+    try {
+      this.privateKey = fs.readFileSync(
+        path.join(import.meta.dirname, "../../../certs/jwt-private.pem"),
+        "utf8"
       );
+      this.publicKey = fs.readFileSync(
+        path.join(import.meta.dirname, "../../../certs/jwt-public.pem"),
+        "utf8"
+      );
+    } catch {
+      throw new Error("JWT key pair not found — ensure certs/jwt-private.pem and jwt-public.pem exist");
     }
-
-    this.accessTokenSecret = accessSecret;
-    this.refreshTokenSecret = refreshSecret;
   }
 
   private async hashData(data: string) {
@@ -37,16 +39,16 @@ export class AuthService {
       new Promise<string>((resolve, reject) =>
         jwt.sign(
           { sub: userId, username },
-          this.accessTokenSecret,
-          { expiresIn: ACCESS_TOKEN_EXPIRY },
+          this.privateKey,
+          { algorithm: "RS256", expiresIn: ACCESS_TOKEN_EXPIRY },
           (err, token) => (err || !token ? reject(err) : resolve(token))
         )
       ),
       new Promise<string>((resolve, reject) =>
         jwt.sign(
           { sub: userId, username },
-          this.refreshTokenSecret,
-          { expiresIn: REFRESH_TOKEN_EXPIRY },
+          this.privateKey,
+          { algorithm: "RS256", expiresIn: REFRESH_TOKEN_EXPIRY },
           (err, token) => (err || !token ? reject(err) : resolve(token))
         )
       ),
@@ -129,21 +131,17 @@ export class AuthService {
   async logout(refreshToken: string) {
     let decoded: { sub: string };
     try {
-      decoded = jwt.verify(refreshToken, this.refreshTokenSecret) as { sub: string };
+      decoded = jwt.verify(refreshToken, this.publicKey, { algorithms: ["RS256"] }) as { sub: string };
     } catch {
-      throw new RpcException({
-        code: GrpcStatus.UNAUTHENTICATED,
-        message: "Invalid refresh token",
-      });
+      throw new RpcException({ code: GrpcStatus.UNAUTHENTICATED, message: "Invalid refresh token" });
     }
-
     await this.usersService.updateRefreshToken(decoded.sub, null);
     return { message: "Logged out successfully" };
   }
 
   async validateAccessToken(accessToken: string) {
     try {
-      const decoded = jwt.verify(accessToken, this.accessTokenSecret) as {
+      const decoded = jwt.verify(accessToken, this.publicKey, { algorithms: ["RS256"] }) as {
         sub: string;
         username: string;
       };
