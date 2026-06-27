@@ -27,7 +27,7 @@ jobs:
       DATABASE_URL: "postgresql://meetapp:meetapp_dev_password@localhost:5432/meetapp_users?schema=public"
       JWT_PRIVATE_KEY_PATH: ${{ github.workspace }}/certs/jwt-private.pem
       JWT_PUBLIC_KEY_PATH: ${{ github.workspace }}/certs/jwt-public.pem
-     steps:
+    steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
