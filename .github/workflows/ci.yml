@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  user-service:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: meetapp
+          POSTGRES_PASSWORD: meetapp_dev_password
+          POSTGRES_DB: meetapp_users
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://meetapp:meetapp_dev_password@localhost:5432/meetapp_users?schema=public"
+      JWT_PRIVATE_KEY_PATH: ${{ github.workspace }}/certs/jwt-private.pem
+      JWT_PUBLIC_KEY_PATH: ${{ github.workspace }}/certs/jwt-public.pem
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Generate test JWT keys
+        run: |
+          mkdir -p certs
+          openssl genrsa -out certs/jwt-private.pem 2048
+          openssl rsa -in certs/jwt-private.pem -pubout -out certs/jwt-public.pem
+      - working-directory: user-service
+        run: npx prisma migrate deploy
+      - working-directory: user-service
+        run: npx tsc --noEmit
+      - working-directory: user-service
+        run: npm test
+
+  group-service:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: meetapp
+          POSTGRES_PASSWORD: meetapp_dev_password
+          POSTGRES_DB: meetapp_groups
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://meetapp:meetapp_dev_password@localhost:5432/meetapp_groups?schema=public"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - working-directory: group-service
+        run: npx prisma migrate deploy
+      - working-directory: group-service
+        run: npx tsc --noEmit
+      - working-directory: group-service
+        run: npm test
+
+  gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - working-directory: gateway
+        run: npx tsc --noEmit
+      - working-directory: gateway
+        run: npm test
