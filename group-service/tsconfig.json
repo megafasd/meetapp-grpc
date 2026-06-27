@@ -9,6 +9,6 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "types": ["node", "jest"]
+    "isolatedModules": true
   }
 }

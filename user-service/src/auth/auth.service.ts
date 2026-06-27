@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
 import { status as GrpcStatus } from "@grpc/grpc-js";
+import * as fs from "fs";
+import * as path from "path";
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { UsersService } from "../users/users.service.js";
-import * as fs from "fs";
-import * as path from "path";
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
@@ -16,17 +16,20 @@ export class AuthService {
   private readonly publicKey: string;
 
   constructor(private usersService: UsersService) {
+    const privateKeyPath =
+      process.env.JWT_PRIVATE_KEY_PATH ??
+      path.join(import.meta.dirname, "../../../../certs/jwt-private.pem");
+    const publicKeyPath =
+      process.env.JWT_PUBLIC_KEY_PATH ??
+      path.join(import.meta.dirname, "../../../../certs/jwt-public.pem");
+
     try {
-      this.privateKey = fs.readFileSync(
-      path.join(import.meta.dirname, "../../../../certs/jwt-private.pem"),
-      "utf8"
-      );
-      this.publicKey = fs.readFileSync(
-      path.join(import.meta.dirname, "../../../../certs/jwt-public.pem"),
-      "utf8"
-      );
+      this.privateKey = fs.readFileSync(privateKeyPath, "utf8");
+      this.publicKey = fs.readFileSync(publicKeyPath, "utf8");
     } catch {
-      throw new Error("JWT key pair not found — ensure certs/jwt-private.pem and jwt-public.pem exist");
+      throw new Error(
+        `JWT key pair not found at ${privateKeyPath} / ${publicKeyPath}`
+      );
     }
   }
 
