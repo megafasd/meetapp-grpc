@@ -27,7 +27,7 @@ jobs:
       DATABASE_URL: "postgresql://meetapp:meetapp_dev_password@localhost:5432/meetapp_users?schema=public"
       JWT_PRIVATE_KEY_PATH: ${{ github.workspace }}/certs/jwt-private.pem
       JWT_PUBLIC_KEY_PATH: ${{ github.workspace }}/certs/jwt-public.pem
-    steps:
+     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -38,6 +38,11 @@ jobs:
           mkdir -p certs
           openssl genrsa -out certs/jwt-private.pem 2048
           openssl rsa -in certs/jwt-private.pem -pubout -out certs/jwt-public.pem
+      - name: Build shared-dto
+        run: npm run build --workspace=shared-dto
+      - name: Generate Prisma client
+        working-directory: user-service
+        run: npx prisma generate
       - working-directory: user-service
         run: npx prisma migrate deploy
       - working-directory: user-service
@@ -69,6 +74,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Generate Prisma client
+        working-directory: group-service
+        run: npx prisma generate
+      - name: Generate gRPC client types
+        working-directory: group-service
+        run: npm run generate
       - working-directory: group-service
         run: npx prisma migrate deploy
       - working-directory: group-service
@@ -84,6 +95,11 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Build shared-dto
+        run: npm run build --workspace=shared-dto
+      - name: Generate gRPC client types
+        working-directory: gateway
+        run: npm run generate
       - working-directory: gateway
         run: npx tsc --noEmit
       - working-directory: gateway
