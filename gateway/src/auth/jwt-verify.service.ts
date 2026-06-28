@@ -1,4 +1,3 @@
-// gateway/src/auth/jwt-verify.service.ts
 import { Injectable } from "@nestjs/common";
 import * as fs from "fs";
 import * as path from "path";
@@ -9,10 +8,18 @@ export class JwtVerifyService {
   private readonly publicKey: string;
 
   constructor() {
-    this.publicKey = fs.readFileSync(
-      path.join(import.meta.dirname, "../../../certs/jwt-public.pem"),
-      "utf8"
+    this.publicKey = process.env.JWT_PUBLIC_KEY ?? this.readKeyFile(
+      process.env.JWT_PUBLIC_KEY_PATH ??
+      path.join(import.meta.dirname, "../../certs/jwt-public.pem")
     );
+  }
+
+  private readKeyFile(filePath: string): string {
+    try {
+      return fs.readFileSync(filePath, "utf8");
+    } catch {
+      throw new Error(`JWT public key not found at ${filePath}, and no JWT_PUBLIC_KEY env var set`);
+    }
   }
 
   verify(token: string): { userId: string; username: string } {
