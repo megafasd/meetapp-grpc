@@ -16,22 +16,23 @@ export class AuthService {
   private readonly publicKey: string;
 
   constructor(private usersService: UsersService) {
-    const privateKeyPath =
-      process.env.JWT_PRIVATE_KEY_PATH ??
-      path.join(import.meta.dirname, "../../../../certs/jwt-private.pem");
-    const publicKeyPath =
-      process.env.JWT_PUBLIC_KEY_PATH ??
-      path.join(import.meta.dirname, "../../../../certs/jwt-public.pem");
+  this.privateKey = process.env.JWT_PRIVATE_KEY ?? this.readKeyFile(
+    process.env.JWT_PRIVATE_KEY_PATH ??
+    path.join(import.meta.dirname, "../../../../certs/jwt-private.pem")
+  );
+  this.publicKey = process.env.JWT_PUBLIC_KEY ?? this.readKeyFile(
+    process.env.JWT_PUBLIC_KEY_PATH ??
+    path.join(import.meta.dirname, "../../../../certs/jwt-public.pem")
+  );
+}
 
-    try {
-      this.privateKey = fs.readFileSync(privateKeyPath, "utf8");
-      this.publicKey = fs.readFileSync(publicKeyPath, "utf8");
-    } catch {
-      throw new Error(
-        `JWT key pair not found at ${privateKeyPath} / ${publicKeyPath}`
-      );
-    }
+private readKeyFile(filePath: string): string {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(`JWT key not found at ${filePath}, and no JWT_PRIVATE_KEY/JWT_PUBLIC_KEY env var set`);
   }
+}
 
   private async hashData(data: string) {
     return argon2.hash(data);
