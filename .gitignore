@@ -9,3 +9,6 @@ generated/
 certs/
 coverage/
 test-client/
+certs-uat/
+certs-staging/
+certs-prod/
