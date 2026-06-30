@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Req } from "@nestjs/common";
+import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { Request } from "express";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { GroupClientService } from "../clients/group-client.service.js";
@@ -8,19 +9,23 @@ interface AuthedRequest extends Request {
   user: { userId: string; username: string };
 }
 
+@ApiTags("availability")
+@ApiBearerAuth()
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class AvailabilityController {
   constructor(private groupClient: GroupClientService) {}
 
+  @ApiOperation({ summary: "Mark yourself available on a given date" })
   @Post("availability")
   async add(@Body() dto: AddAvailabilityDto, @Req() req: AuthedRequest) {
     return this.groupClient.instance.addAvailability({
-      userId: req.user.userId, // again, from the verified token, not the body
+      userId: req.user.userId,
       date: dto.date,
     });
   }
 
+  @ApiOperation({ summary: "Remove your availability for a given date" })
   @Delete("availability")
   async remove(@Body() dto: { date: string }, @Req() req: AuthedRequest) {
     return this.groupClient.instance.removeAvailability({
@@ -29,6 +34,7 @@ export class AvailabilityController {
     });
   }
 
+  @ApiOperation({ summary: "Get your own availability for a given month" })
   @Get("availability/me")
   async getMine(
     @Req() req: AuthedRequest,
@@ -42,6 +48,7 @@ export class AvailabilityController {
     });
   }
 
+  @ApiOperation({ summary: "Get the best hangout dates for a group in a given month" })
   @Get("groups/:groupId/availability")
   async getGroupAvailability(
     @Param("groupId") groupId: string,

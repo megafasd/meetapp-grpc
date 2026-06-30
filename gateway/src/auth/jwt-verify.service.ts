@@ -9,8 +9,8 @@ export class JwtVerifyService {
 
   constructor() {
     this.publicKey = process.env.JWT_PUBLIC_KEY ?? this.readKeyFile(
-      process.env.JWT_PUBLIC_KEY_PATH ??
-      path.join(import.meta.dirname, "../../certs/jwt-public.pem")
+    process.env.JWT_PUBLIC_KEY_PATH ??
+    path.join(import.meta.dirname, "../../../certs/jwt-public.pem")
     );
   }
 
