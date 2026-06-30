@@ -23,6 +23,50 @@ services:
     volumes:
       - postgres_group_data:/var/lib/postgresql/data
 
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    depends_on:
+      - postgres-user
+    environment:
+      - DATABASE_URL=postgresql://meetapp:meetapp_dev_password@postgres-user:5432/meetapp_users?schema=public
+      - JWT_PRIVATE_KEY_PATH=/app/certs/jwt-private.pem
+      - JWT_PUBLIC_KEY_PATH=/app/certs/jwt-public.pem
+    volumes:
+      - ./certs:/app/certs
+    ports:
+      - "50051:50051"
+
+  group-service:
+    build:
+      context: .
+      dockerfile: group-service/Dockerfile
+    depends_on:
+      - postgres-group
+    environment:
+      - DATABASE_URL=postgresql://meetapp:meetapp_dev_password@postgres-group:5432/meetapp_groups?schema=public
+      - USER_SERVICE_URL=user-service:50051
+    ports:
+      - "50052:50052"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    depends_on:
+      - user-service
+      - group-service
+    environment:
+      - USER_SERVICE_URL=user-service:50051
+      - GROUP_SERVICE_URL=group-service:50052
+      - JWT_PUBLIC_KEY_PATH=/app/certs/jwt-public.pem
+      - PORT=3000
+    volumes:
+      - ./certs:/app/certs
+    ports:
+      - "3000:3000"
+
 volumes:
   postgres_user_data:
   postgres_group_data:
