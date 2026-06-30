@@ -1,6 +1,10 @@
 import { createDefaultEsmPreset } from "ts-jest";
 
-const presetConfig = createDefaultEsmPreset();
+const presetConfig = createDefaultEsmPreset({
+  tsconfig: {
+    rootDir: "src",
+  },
+});
 
 export default {
   ...presetConfig,
